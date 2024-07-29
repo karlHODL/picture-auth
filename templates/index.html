@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <title>Webcam Capture</title>
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+</head>
+
+<body>
+    <h1>Webcam Capture</h1>
+    <img src="{{ url_for('video_feed') }}">
+    <form id="captureForm">
+        <input type="text" name="npub" placeholder="Enter npub">
+        <input type="password" name="nsec" placeholder="Enter nsec">
+        <button type="submit">Capture and Process</button>
+    </form>
+    <div id="result"></div>
+
+    <script>
+        $(document).ready(function () {
+            $('#captureForm').submit(function (e) {
+                e.preventDefault();
+                $.ajax({
+                    url: '/capture',
+                    type: 'post',
+                    data: $('#captureForm').serialize(),
+                    success: function (response) {
+                        let resultHtml = `<p>${response.message}</p>`;
+                        if (response.metadata) {
+                            resultHtml += '<h3>Extracted Metadata:</h3>';
+                            resultHtml += '<ul>';
+                            for (let key in response.metadata) {
+                                resultHtml += `<li>${key}: ${response.metadata[key]}</li>`;
+                            }
+                            resultHtml += '</ul>';
+                        }
+                        $('#result').html(resultHtml);
+                    },
+                    error: function (xhr) {
+                        $('#result').html(`<p>Error: ${xhr.responseJSON.error}</p>`);
+                    }
+                });
+            });
+        });
+    </script>
+</body>
+
+</html>
