@@ -1,7 +1,9 @@
+from datetime import datetime
 from flask import Flask, render_template, Response, request, jsonify
 import cv2
 import numpy as np
 import logging
+import os
 from picture import Picture
 from user import User
 
@@ -44,7 +46,18 @@ def capture():
             npub = request.form['npub']
             nsec = request.form['nsec']
             new_user = User(npub, nsec)
-            new_img = Picture(new_user.public_key, new_user.private_key, 'example.jpg', 'example_metadata.jpg')
+
+            # Create the filename and path
+            timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
+            filename = f'{timestamp}_{npub}.jpg'
+            filepath = os.path.join('captures', filename)
+
+            # Make sure the directory exists
+            os.makedirs('captures', exist_ok=True)
+
+            cv2.imwrite(filepath, frame)
+
+            new_img = Picture(new_user.public_key, new_user.private_key, filepath, filepath)
             new_img.add_metadata()
             metadata = new_img.extract_metadata()
             
@@ -56,6 +69,7 @@ def capture():
             
             return jsonify({
                 'message': 'Image captured and processed successfully',
+                'filepath': filepath,
                 'metadata': formatted_metadata
             })
         else:

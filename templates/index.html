@@ -34,6 +34,7 @@
                             }
                             resultHtml += '</ul>';
                         }
+                        resultHtml += `<p>${response.filepath}</p>`;
                         $('#result').html(resultHtml);
                     },
                     error: function (xhr) {
